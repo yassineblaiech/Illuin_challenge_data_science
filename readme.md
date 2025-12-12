@@ -80,6 +80,9 @@ python classification_with_embeddings\centroid_approach.py
 ```bash
 python classification_with_embeddings\neural_network_for_classification.py
 
+**Option C: Run the fine tuning approach (a tested method that didn't show very promising results)**
+supervised_fine_tuning\llm_fine_tuning_for_classification.ipynb
+
 
 
 
