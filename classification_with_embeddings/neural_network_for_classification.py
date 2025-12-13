@@ -452,4 +452,13 @@ if __name__ == "__main__":
     
     plot_training_history(train_history, val_history)
     plot_test_metrics(test_metrics_data)
+    save_dir = './NN_model'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        print(f"Created directory: {save_dir}")
+
+    save_path = os.path.join(save_dir, 'final_model.pth')
+
+    torch.save(trained_model.state_dict(), save_path)
     
+    print(f"Model successfully saved to: {save_path}")

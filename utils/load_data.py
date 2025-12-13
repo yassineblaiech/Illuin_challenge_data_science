@@ -4,7 +4,8 @@ import pandas as pd
 
 def folder_to_dataframe(folder_path):
     """
-    Reads all JSON files from a specified folder and converts them into a pandas DataFrame.
+    Reads all JSON files from a specified folder and converts them into a pandas DataFrame,
+    including the source filename for each record.
     
     Args:
     folder_path (str): The path to the folder containing JSON files.
@@ -27,8 +28,12 @@ def folder_to_dataframe(folder_path):
                     data = json.load(f)
                     
                     if isinstance(data, list):
+                        for item in data:
+                            if isinstance(item, dict):
+                                item['filename'] = filename
                         data_list.extend(data)
-                    else:
+                    elif isinstance(data, dict):
+                        data['filename'] = filename
                         data_list.append(data)
                         
             except json.JSONDecodeError:

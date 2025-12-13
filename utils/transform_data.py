@@ -16,8 +16,8 @@ from utils.embedding_function import focussed_embedding_function
 from utils.load_data import clean_format_dataframe,folder_to_dataframe
 
 
-def encode_data(clean_data_frame):
-    """
+def encode_data(clean_data_frame,output_database_path="./my_vector_db", embedding_function=embedding_function):
+    """ 
     Encodes text data into feature vectors and tags into one-hot encoded labels.
 
 
@@ -50,8 +50,6 @@ def encode_data(clean_data_frame):
 
             - np.ndarray: The feature matrix (X) of shape (n_samples, n_features).
 
-            - np.ndarray: The one-hot encoded label matrix (y) of shape (n_samples, n_classes).
-
     """
     clean_data_frame['prob_desc_notes'] = clean_data_frame['prob_desc_notes'].fillna('')
     clean_data_frame['prob_desc_output_spec'] = clean_data_frame['prob_desc_output_spec'].fillna('')
@@ -60,7 +58,6 @@ def encode_data(clean_data_frame):
 
     text_columns = ['prob_desc_input_spec', 'prob_desc_output_spec', 'prob_desc_description', 'prob_desc_notes']
     text_to_encode = clean_data_frame[text_columns].agg('\n'.join, axis=1).tolist()
-    print(text_to_encode)
     
     print(f'Total samples to encode: {len(text_to_encode)}')
 
@@ -80,10 +77,10 @@ def encode_data(clean_data_frame):
     X = np.vstack(list_of_embeddings)
     
     print(f"DEBUG: X shape is {X.shape}")
-    chroma_client = chromadb.PersistentClient(path="./my_vector_db")
+    chroma_client = chromadb.PersistentClient(path=output_database_path)
     collection = chroma_client.get_or_create_collection(name="code_problems")
 
-    ids = [str(i) for i in range(len(clean_df))]
+    ids = [str(i) for i in range(len(clean_data_frame))]
     collection.add(
         embeddings=X.tolist(),
         documents=text_to_encode,
