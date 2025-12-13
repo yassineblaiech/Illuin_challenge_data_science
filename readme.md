@@ -75,14 +75,21 @@ To interpret results, a unified plotting module generates:
 **Option A: Run the Centroid Classifier (Fast & Interpretable)**
 ```bash
 python classification_with_embeddings\centroid_approach.py
-
+```
 **Option B: Run the Neural Network (High Capacity & Optimized)**
 ```bash
 python classification_with_embeddings\neural_network_for_classification.py
-
+```
 **Option C: Run the fine tuning approach (a tested method that didn't show very promising results)**
 supervised_fine_tuning\llm_fine_tuning_for_classification.ipynb
 
+## 5. Inference CLI (Prediction)
 
+Once the Neural Network is trained, you can use `main.py` to generate predictions for new, unseen (or labeled) problem descriptions. The script accepts a folder of text files, generates embeddings, classifies them, and saves the results as individual JSON files.
 
+### Quick Start
+To run inference using the default model on a folder of test data:
 
+```bash
+python main.py --data_dir ./path/to/test_data
+```

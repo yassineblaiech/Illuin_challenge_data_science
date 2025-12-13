@@ -16,6 +16,54 @@ except ImportError:
     print("Error: Could not import from 'utils.transform_data'. Ensure the 'utils' folder is in the same directory.")
     sys.exit(1)
 
+def print_usage_guide():
+    """
+    Prints a friendly, example-based guide to help the user choose the right CLI command.
+    """
+    guide = """
+    ================================================================================
+                                INFERENCE CLI HELPER
+    ================================================================================
+    This script generates predictions for text files using your MultiLabel Classifier.
+    
+    COMMON SCENARIOS & COMMANDS:
+    --------------------------------------------------------------------------------
+    
+    1. [BASIC] Run with default settings:
+       (Assumes model is in ./NN_model/final_model.pth)
+       
+       python inference.py --data_dir ./test_data_folder
+
+    2. [CUSTOM MODEL] Use a specific model file:
+       
+       python inference.py --data_dir ./test_data_folder --model_path ./my_models/epoch_10.pth
+
+    3. [STRICTER PREDICTION] Increase confidence threshold to 80%:
+       (Only predicts labels if the model is very sure)
+       
+       python inference.py --data_dir ./test_data_folder --threshold 0.8
+
+    4. [CUSTOM OUTPUT] Save JSON results to a specific folder:
+       
+       python inference.py --data_dir ./test_data_folder --output_dir ./my_results
+
+    5. [MODEL ARCHITECTURE] If you trained with a specific hidden size (e.g., 256):
+       
+       python inference.py --data_dir ./test_data_folder --hidden_size 256
+
+    --------------------------------------------------------------------------------
+    REQUIRED ARGUMENTS:
+      --data_dir     : Path to the folder containing .txt files to classify.
+
+    OPTIONAL ARGUMENTS:
+      --model_path   : Path to .pth file (Default: ./NN_model/final_model.pth)
+      --output_dir   : Where to save JSONs (Default: ./inference_output)
+      --threshold    : cutoff for classification 0.0 to 1.0 (Default: 0.5)
+      --hidden_size  : Size of hidden layer if different from default.
+    ================================================================================
+    """
+    print(guide)
+
 def predict(model, embeddings, threshold=0.5, class_names=None):
     model.eval()
     with torch.no_grad():
@@ -47,8 +95,16 @@ def main():
     parser.add_argument('--hidden_size', type=int, default=None, help="The hidden_size used in the best trial (e.g., 128, 256). Leave empty if None.")
     parser.add_argument('--threshold', type=float, default=0.5, help="Probability threshold for classification.")
     parser.add_argument('--output_dir', type=str, default='./inference_output', help="Directory to save individual JSON files.")
+    parser.add_argument('--guide', action='store_true', help="Show the extended usage guide.")
     
     args = parser.parse_args()
+    
+    if args.guide or args.data_dir is None:
+        print_usage_guide()
+        if args.data_dir is None:
+            print("\nError: Argument '--data_dir' is required to run inference.")
+            sys.exit(1)
+        sys.exit(0)
 
     CLASS_NAMES = ['math', 'graphs', 'strings', 'number theory', 'trees', 'geometry', 'games', 'probabilities']
     INPUT_SIZE = 768
@@ -88,7 +144,7 @@ def main():
     print("--- Running Inference ---")
     results = predict(model, embeddings, threshold=args.threshold, class_names=CLASS_NAMES)
     
-    if raw_df.columns.contains('tags'):
+    if 'tags' in list(raw_df.columns):
         y = get_labels(clean_df) 
         y = torch.tensor(y, dtype=torch.int32)
         test_metrics_data = evaluate_model_metrics(model, embeddings, y, class_names=CLASS_NAMES)
